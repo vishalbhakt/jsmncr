@@ -1,333 +1,223 @@
-'use client';
-import Navbar from '@/components/Navbar';
-import HeroSection from '@/components/HeroSection';
-import Footer from '@/components/Footer';
-import ToastContainer from '@/components/ToastContainer';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { enquiriesAPI } from '@/lib/api';
+"use client";
 
-const courses = [
-  { icon: '🧒', name: 'Kindergarten (K.G.)', desc: 'Play, learn and grow with fun activities' },
-  { icon: '📚', name: 'Primary (Class 1–2)', desc: 'Building strong fundamentals in every subject' },
-  { icon: '🔬', name: 'Prep (Class 3–5)', desc: 'Concept clarity and sparking curiosity' },
-  { icon: '🏫', name: 'Middle (Class 6–8)', desc: 'Preparing students for a bright future' },
-];
-
-const facilities = [
-  { icon: '📚', name: 'Library', desc: 'Rich collection of books & digital resources' },
-  { icon: '💻', name: 'Computer Lab', desc: 'Modern computers with high-speed internet' },
-  { icon: '🏀', name: 'Sports Ground', desc: 'Spacious playground for outdoor activities' },
-  { icon: '🎨', name: 'Art & Craft Room', desc: 'Creative space for artistic expression' },
-  { icon: '🚌', name: 'Transport', desc: 'Safe and reliable school bus service' },
-  { icon: '🏥', name: 'Medical Room', desc: 'First aid and health monitoring facility' },
-];
-
-const testimonials = [
-  { name: 'Priya Sharma', role: 'Parent of Class 5 student', text: 'JSM Academy has transformed my child\'s learning. The teachers are extremely dedicated and caring.', stars: 5 },
-  { name: 'Rahul Verma', role: 'Parent of Class 3 student', text: 'Excellent school with a perfect balance of academics and co-curricular activities. Highly recommended!', stars: 5 },
-  { name: 'Sunita Gupta', role: 'Parent of Class 7 student', text: 'The individual attention given to each student is remarkable. My son has shown tremendous improvement.', stars: 5 },
-];
-
-const teachers = [
-  { name: 'Aarif Khan', subject: 'Mathematics', exp: '8 Years Experience', emoji: '👨‍🏫' },
-  { name: 'Shivam Maurya', subject: 'Science', exp: '6 Years Experience', emoji: '👨‍🔬' },
-  { name: 'Mukul Sharma', subject: 'English & Hindi', exp: '10 Years Experience', emoji: '📖' },
-  { name: 'Govind Singh', subject: 'Social Studies', exp: '7 Years Experience', emoji: '🌍' },
-];
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import Link from "next/link";
+import { 
+  ArrowRight, 
+  GraduationCap, 
+  ShieldCheck, 
+  Users, 
+  Calendar,
+  BookOpen,
+  Music,
+  HeartPulse,
+  Computer,
+  Trophy
+} from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function Home() {
-  const [form, setForm] = useState({ parent_name: '', student_name: '', phone: '', class_applied: '', message: '' });
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      await enquiriesAPI.create(form);
-      setSubmitted(true);
-      setForm({ parent_name: '', student_name: '', phone: '', class_applied: '', message: '' });
-    } catch {
-      alert('Failed to submit. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const sectionHeader = (title: string, sub: string, light = false) => (
-    <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-      <h2 style={{ fontFamily: 'Newsreader, serif', fontSize: 'clamp(28px,4vw,44px)', color: light ? '#fff' : 'var(--navy)', marginBottom: '12px' }}
-        dangerouslySetInnerHTML={{ __html: title }} />
-      <p style={{ color: light ? 'rgba(255,255,255,0.65)' : '#64748b', fontSize: '16px' }}>{sub}</p>
-    </div>
-  );
-
-  const card = (children: React.ReactNode, extra: React.CSSProperties = {}) => (
-    <div style={{ background: '#fff', borderRadius: '16px', padding: '28px', boxShadow: '0 4px 24px rgba(0,0,0,0.07)', border: '1px solid #e2e8f0', transition: 'transform 0.2s, box-shadow 0.2s', ...extra }}
-      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 40px rgba(0,0,0,0.12)'; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 24px rgba(0,0,0,0.07)'; }}
-    >{children}</div>
-  );
-
   return (
-    <>
-      <ToastContainer />
+    <div className="bg-pearl selection:bg-gold/30">
       <Navbar />
-      <HeroSection />
 
-      {/* Ticker */}
-      <div style={{ background: 'var(--gold)', padding: '10px 0', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-        <div className="ticker-animate" style={{ display: 'inline-block' }}>
-          <span style={{ color: 'var(--navy)', fontWeight: 700, fontSize: '14px', padding: '0 40px' }}>
-            📢 Admissions Open 2025-26 &nbsp;|&nbsp; Limited Seats &nbsp;|&nbsp; PTM on 18 May 2025 (Saturday) &nbsp;|&nbsp; Annual Sports Day on 28 May &nbsp;|&nbsp; Results out for Class 5–8 &nbsp;|&nbsp;
-            📢 Admissions Open 2025-26 &nbsp;|&nbsp; Limited Seats &nbsp;|&nbsp; PTM on 18 May 2025 (Saturday) &nbsp;|&nbsp; Annual Sports Day on 28 May &nbsp;|&nbsp; Results out for Class 5–8 &nbsp;|&nbsp;
-          </span>
+      {/* Hero Section */}
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-navy pt-20">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="space-y-8"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gold/10 text-gold rounded-full text-xs font-black uppercase tracking-widest border border-gold/20">
+              <ShieldCheck className="w-4 h-4" /> Admission Open for Session 2024-25
+            </div>
+            <h1 className="text-6xl md:text-8xl font-black text-white leading-[1.05] tracking-tight">
+              Nurturing <span className="text-gold">Excellence</span> Since 2014.
+            </h1>
+            <p className="text-lg text-white/60 max-w-lg leading-relaxed font-medium">
+              Join JSM Shiksha Academy, where we combine traditional values with modern learning methodologies to prepare your child for a bright future.
+            </p>
+            <div className="flex flex-wrap gap-4 pt-4">
+              <Link href="/admission" className="btn-gold py-4 px-10 text-sm tracking-widest uppercase font-black shadow-xl shadow-gold/10 flex items-center gap-3">
+                Apply Now <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link href="/about" className="border-2 border-white/10 text-white hover:bg-white/5 py-4 px-10 rounded-xl text-sm uppercase font-black tracking-widest transition-all">
+                Learn More
+              </Link>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative hidden lg:block"
+          >
+            <div className="aspect-square bg-gradient-to-br from-gold/20 to-transparent rounded-[4rem] rotate-6 border border-white/5 p-4 backdrop-blur-3xl overflow-hidden">
+               <div className="w-full h-full bg-navy-light/50 rounded-[3rem] border border-white/5 flex items-center justify-center text-white/20">
+                  <GraduationCap className="w-64 h-64 opacity-10" />
+               </div>
+            </div>
+            {/* Stats Floaters */}
+            <div className="absolute top-10 -left-10 bg-white p-6 rounded-3xl shadow-2xl border border-navy/5 flex items-center gap-4 animate-bounce duration-[4000ms]">
+               <div className="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center">
+                  <Users className="w-6 h-6" />
+               </div>
+               <div>
+                  <div className="text-2xl font-black text-navy leading-none">500+</div>
+                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Students</div>
+               </div>
+            </div>
+            <div className="absolute bottom-10 -right-10 bg-white p-6 rounded-3xl shadow-2xl border border-navy/5 flex items-center gap-4 animate-bounce duration-[3000ms]">
+               <div className="w-12 h-12 bg-gold/10 text-gold rounded-2xl flex items-center justify-center">
+                  <Trophy className="w-6 h-6" />
+               </div>
+               <div>
+                  <div className="text-2xl font-black text-navy leading-none">10+ Years</div>
+                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Excellence</div>
+               </div>
+            </div>
+          </motion.div>
         </div>
-      </div>
+        
+        {/* Background Elements */}
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gold/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
+      </section>
 
-      {/* About Section */}
-      <section id="about" style={{ padding: '80px 24px', background: '#fff' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px', alignItems: 'center' }}>
-          <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-            <span style={{ color: 'var(--gold)', fontWeight: 700, fontSize: '13px', letterSpacing: '2px' }}>ABOUT US</span>
-            <h2 style={{ fontFamily: 'Newsreader, serif', fontSize: '40px', color: 'var(--navy)', margin: '12px 0' }}>
-              Shaping Future <em>Leaders</em>
-            </h2>
-            <p style={{ color: '#64748b', lineHeight: 1.8, marginBottom: '16px' }}>
-              At JSM Shiksha Academy, we believe in nurturing young minds through quality education, strong values and holistic development. Our aim is to empower students to become confident, responsible and compassionate individuals.
-            </p>
-            <p style={{ color: '#64748b', lineHeight: 1.8, marginBottom: '28px' }}>
-              Founded with a mission to provide world-class education in Nihal Vihar, New Delhi, we serve students from Kindergarten to Class 8 with experienced teachers and modern teaching methods.
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              {[
-                ['🎯', 'Mission-Driven'],
-                ['🌟', 'Excellence First'],
-                ['🤝', 'Community Bond'],
-                ['💡', 'Innovation'],
-              ].map(([icon, label]) => (
-                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', background: '#f8f9ff', borderRadius: '10px' }}>
-                  <span style={{ fontSize: '20px' }}>{icon}</span>
-                  <span style={{ fontWeight: 700, color: 'var(--navy)', fontSize: '14px' }}>{label}</span>
-                </div>
-              ))}
+      {/* Core Highlights */}
+      <section className="py-32 max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10 -mt-20 relative z-20">
+        {[
+          { icon: ShieldCheck, title: "Secure Environment", desc: "Safe, engaging and supportive learning atmosphere for every child." },
+          { icon: Users, title: "Expert Faculty", desc: "Personalized attention from highly qualified and dedicated teachers." },
+          { icon: GraduationCap, title: "Holistic Growth", desc: "Balanced focus on academics, co-curricular activities and character." }
+        ].map((item, i) => (
+          <div key={i} className="bg-white p-10 rounded-[2.5rem] border border-navy/5 shadow-xl shadow-navy/5 hover:border-gold/30 transition-all group">
+            <div className="w-14 h-14 bg-navy rounded-2xl flex items-center justify-center text-gold mb-8 group-hover:scale-110 transition-transform">
+              <item.icon className="w-7 h-7" />
             </div>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              {[
-                { num: '500+', label: 'Happy Students', icon: '👥' },
-                { num: '25+', label: 'Expert Teachers', icon: '👨‍🏫' },
-                { num: '10+', label: 'Years Excellence', icon: '🏆' },
-                { num: '100%', label: 'Commitment', icon: '✅' },
-              ].map((s) => (
-                <div key={s.label} style={{ background: 'linear-gradient(135deg, var(--navy), var(--navy-light))', borderRadius: '16px', padding: '24px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '32px', marginBottom: '8px' }}>{s.icon}</div>
-                  <div className="gradient-text" style={{ fontSize: '28px', fontWeight: 900 }}>{s.num}</div>
-                  <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', marginTop: '4px' }}>{s.label}</div>
-                </div>
-              ))}
+            <h3 className="text-2xl font-black text-navy mb-4 leading-tight">{item.title}</h3>
+            <p className="text-slate-500 font-medium leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </section>
+
+      {/* About Summary */}
+      <section className="py-32 bg-white overflow-hidden relative">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          <div className="relative">
+            <div className="aspect-[4/5] bg-slate-100 rounded-[3rem] border border-navy/5 overflow-hidden">
+               <div className="w-full h-full flex items-center justify-center text-slate-300 italic font-medium p-12 text-center leading-relaxed">
+                  [Professional School Environment Image]
+               </div>
             </div>
-          </motion.div>
+            <div className="absolute -bottom-10 -right-10 bg-gold p-10 rounded-[2rem] text-navy shadow-2xl hidden md:block">
+              <div className="text-4xl font-black mb-1">100%</div>
+              <div className="text-xs font-black uppercase tracking-widest opacity-80">Commitment to <br/>Quality Education</div>
+            </div>
+          </div>
+          <div className="space-y-8">
+            <div className="text-gold font-black uppercase tracking-[0.2em] text-xs">Our Philosophy</div>
+            <h2 className="text-5xl font-black text-navy leading-tight">Where Every Child's <br/><span className="text-gold italic">Potential</span> Is Unlocked.</h2>
+            <p className="text-lg text-slate-600 leading-relaxed font-medium">
+              JSM Shiksha Academy is dedicated to nurturing young minds from Kindergarten to Grade 8. We provide quality education through a balanced approach that combines academics, discipline, and character development.
+            </p>
+            <ul className="space-y-4">
+              {['Mission-Driven Learning', 'State-of-the-art Infrastructure', 'Empowering Future Leaders'].map(item => (
+                <li key={item} className="flex items-center gap-4 text-navy font-bold">
+                  <div className="w-6 h-6 bg-gold/20 text-gold rounded-full flex items-center justify-center">
+                    <ArrowRight className="w-3 h-3" />
+                  </div>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link href="/about" className="btn-primary inline-flex mt-4">Discover Our Vision</Link>
+          </div>
         </div>
       </section>
 
-      {/* Courses Section */}
-      <section id="courses" style={{ padding: '80px 24px', background: 'var(--off-white)' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          {sectionHeader('Our <span style="color:var(--gold)">Courses</span>', 'A complete learning journey from Kindergarten to Class 8')}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px' }}>
-            {courses.map((c) => card(
-              <>
-                <div style={{ fontSize: '40px', marginBottom: '12px' }}>{c.icon}</div>
-                <h3 style={{ fontFamily: 'Newsreader, serif', color: 'var(--navy)', marginBottom: '8px', fontSize: '20px' }}>{c.name}</h3>
-                <p style={{ color: '#64748b', fontSize: '14px', lineHeight: 1.6 }}>{c.desc}</p>
-              </>
+      {/* Academic Levels */}
+      <section className="py-32 bg-navy relative">
+        <div className="max-w-7xl mx-auto px-6 text-center space-y-12 relative z-10">
+          <div className="space-y-4">
+            <div className="text-gold font-black uppercase tracking-[0.2em] text-xs">Academic Excellence</div>
+            <h2 className="text-5xl font-black text-white leading-tight">Levels of Learning</h2>
+            <p className="text-white/40 max-w-xl mx-auto font-medium">Progressive educational stages designed for age-appropriate development.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              { level: "Kindergarten", name: "(K.G.)", focus: "Play, Learn & Grow" },
+              { level: "Primary", name: "(Grades 1-2)", focus: "Strong Foundations" },
+              { level: "Prep", name: "(Grades 3-5)", focus: "Concept & Curiosity" },
+              { level: "Middle School", name: "(Grades 6-8)", focus: "Preparing for Future" }
+            ].map((item, i) => (
+              <div key={i} className="bg-white/5 border border-white/10 p-10 rounded-[2.5rem] hover:bg-gold/10 hover:border-gold/30 transition-all text-left group">
+                <div className="text-4xl font-black text-white/10 mb-6 group-hover:text-gold/20 transition-all">0{i+1}</div>
+                <h4 className="text-xl font-black text-white">{item.level}</h4>
+                <div className="text-gold text-sm font-bold mt-1 mb-6 uppercase tracking-widest">{item.name}</div>
+                <p className="text-white/50 text-sm font-medium leading-relaxed">{item.focus}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Facilities */}
-      <section id="facilities" style={{ padding: '80px 24px', background: 'linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%)' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          {sectionHeader('Our <span style="color:var(--gold-light)">Facilities</span>', 'World-class environment for holistic growth', true)}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-            {facilities.map((f) => (
-              <motion.div key={f.name}
-                whileHover={{ y: -6, scale: 1.02 }}
-                style={{ background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(10px)', border: '1px solid rgba(201,162,39,0.2)', borderRadius: '16px', padding: '24px', textAlign: 'center', cursor: 'default' }}
-              >
-                <div style={{ fontSize: '36px', marginBottom: '12px' }}>{f.icon}</div>
-                <h3 style={{ color: '#fff', fontFamily: 'Newsreader, serif', marginBottom: '8px', fontSize: '18px' }}>{f.name}</h3>
-                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '13px', lineHeight: 1.5 }}>{f.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Teachers */}
-      <section id="teachers" style={{ padding: '80px 24px', background: '#fff' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          {sectionHeader('Meet Our <span style="color:var(--gold)">Teachers</span>', 'Dedicated educators committed to student success')}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px' }}>
-            {teachers.map((t) => card(
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--navy), var(--navy-light))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '36px', margin: '0 auto 16px' }}>{t.emoji}</div>
-                <h3 style={{ fontFamily: 'Newsreader, serif', color: 'var(--navy)', marginBottom: '4px' }}>{t.name}</h3>
-                <p style={{ color: 'var(--gold)', fontWeight: 700, fontSize: '13px', marginBottom: '4px' }}>{t.subject}</p>
-                <p style={{ color: '#94a3b8', fontSize: '12px' }}>{t.exp}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section style={{ padding: '80px 24px', background: 'var(--off-white)' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          {sectionHeader('What <span style="color:var(--gold)">Parents Say</span>', 'Trusted by hundreds of families across New Delhi')}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
-            {testimonials.map((t) => card(
-              <>
-                <div style={{ color: 'var(--gold)', fontSize: '20px', marginBottom: '12px' }}>{'★'.repeat(t.stars)}</div>
-                <p style={{ color: '#475569', lineHeight: 1.7, marginBottom: '16px', fontStyle: 'italic' }}>&ldquo;{t.text}&rdquo;</p>
-                <div style={{ fontWeight: 700, color: 'var(--navy)' }}>{t.name}</div>
-                <div style={{ color: '#94a3b8', fontSize: '13px' }}>{t.role}</div>
-              </>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Gallery */}
-      <section id="gallery" style={{ padding: '80px 24px', background: 'var(--navy)' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          {sectionHeader('School <span style="color:var(--gold-light)">Gallery</span>', 'Moments that define us', true)}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-            {['Annual Sports Day', 'Science Exhibition', 'Cultural Program', 'Classroom Activity', 'Independence Day', 'Art Competition'].map((label, i) => (
-              <motion.div key={label} whileHover={{ scale: 1.03 }}
-                style={{ borderRadius: '12px', overflow: 'hidden', position: 'relative', height: i % 3 === 0 ? '220px' : '160px', background: `hsl(${220 + i * 15}, 40%, ${20 + i * 5}%)`, display: 'flex', alignItems: 'flex-end', cursor: 'pointer' }}
-              >
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }} />
-                <span style={{ position: 'relative', zIndex: 1, color: '#fff', padding: '12px 16px', fontWeight: 700, fontSize: '14px' }}>{label}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Announcements */}
-      <section id="announcements" style={{ padding: '80px 24px', background: '#fff' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          {sectionHeader('Latest <span style="color:var(--gold)">Announcements</span>', 'Stay updated with school notices')}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {[
-              { date: '20 May, 2025', title: 'Summer Holiday Notice', desc: 'School will remain closed from 25 May to 10 June 2025.' },
-              { date: '15 May, 2025', title: 'PTM Meeting', desc: 'PTM will be held on 18 May 2025 (Saturday) for all classes.' },
-              { date: '10 May, 2025', title: 'Annual Sports Day', desc: 'Annual Sports Day will be celebrated on 28 May 2025 at school ground.' },
-              { date: '5 May, 2025', title: 'Admissions Open', desc: 'Admissions for 2025-26 are now open. Limited seats available!' },
-            ].map((a) => (
-              <div key={a.title} style={{ display: 'flex', gap: '20px', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', alignItems: 'flex-start' }}>
-                <div style={{ background: 'var(--navy)', color: 'var(--gold)', padding: '8px 14px', borderRadius: '8px', fontWeight: 800, fontSize: '12px', whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.4 }}>
-                  {a.date.split(',')[0]}<br />{a.date.split(' ').pop()}
-                </div>
-                <div>
-                  <h4 style={{ color: 'var(--navy)', fontWeight: 700, marginBottom: '4px' }}>{a.title}</h4>
-                  <p style={{ color: '#64748b', fontSize: '14px' }}>{a.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Admissions Form */}
-      <section id="admissions" style={{ padding: '80px 24px', background: 'linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%)' }}>
-        <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-          {sectionHeader('Admissions <span style="color:var(--gold-light)">Open 2025-26</span>', 'Secure your child\'s future today — Limited seats available!', true)}
-          {submitted ? (
-            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-              style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.4)', borderRadius: '16px', padding: '40px', textAlign: 'center' }}>
-              <div style={{ fontSize: '60px', marginBottom: '16px' }}>✅</div>
-              <h3 style={{ color: '#fff', fontFamily: 'Newsreader, serif', fontSize: '28px', marginBottom: '12px' }}>Enquiry Submitted!</h3>
-              <p style={{ color: 'rgba(255,255,255,0.7)' }}>We will contact you within 24 hours. Thank you!</p>
-              <button onClick={() => setSubmitted(false)} style={{ marginTop: '20px', background: 'var(--gold)', color: 'var(--navy)', border: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer' }}>Submit Another</button>
-            </motion.div>
-          ) : (
-            <form onSubmit={handleSubmit} style={{ background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(12px)', border: '1px solid rgba(201,162,39,0.2)', borderRadius: '20px', padding: '36px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                {[
-                  { label: "Parent's Name", key: 'parent_name', placeholder: 'Enter parent name' },
-                  { label: "Student's Name", key: 'student_name', placeholder: 'Enter student name' },
-                  { label: 'Phone Number', key: 'phone', placeholder: '+91 XXXXX XXXXX' },
-                ].map((f) => (
-                  <div key={f.key}>
-                    <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>{f.label}</label>
-                    <input value={(form as Record<string, string>)[f.key]} onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-                      placeholder={f.placeholder} required
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: '#fff', fontSize: '14px', outline: 'none' }}
-                    />
-                  </div>
-                ))}
-                <div>
-                  <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Class Applying For</label>
-                  <select value={form.class_applied} onChange={e => setForm({ ...form, class_applied: e.target.value })} required
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'var(--navy)', color: '#fff', fontSize: '14px' }}>
-                    <option value="">Select Class</option>
-                    {['Kindergarten (K.G.)', 'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8'].map(c => <option key={c}>{c}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Message (Optional)</label>
-                <textarea value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} rows={3} placeholder="Any specific query..."
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: '#fff', fontSize: '14px', resize: 'vertical', outline: 'none' }} />
-              </div>
-              <button type="submit" disabled={submitting}
-                style={{ width: '100%', background: 'linear-gradient(135deg, var(--gold), var(--gold-light))', color: 'var(--navy)', border: 'none', padding: '14px', borderRadius: '10px', fontWeight: 800, fontSize: '16px', cursor: submitting ? 'wait' : 'pointer' }}>
-                {submitting ? 'Submitting...' : 'Submit Enquiry →'}
-              </button>
-            </form>
-          )}
-        </div>
-      </section>
-
-      {/* Contact */}
-      <section id="contact" style={{ padding: '80px 24px', background: 'var(--off-white)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          {sectionHeader('Contact <span style="color:var(--gold)">Us</span>', 'We\'d love to hear from you')}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '40px', alignItems: 'start' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {[
-                { icon: '📍', label: 'Address', val: 'RZ-132, Nihal Vihar 50 Feet Road,\nNear Hanuman Mandir, New Delhi' },
-                { icon: '📞', label: 'Phone', val: '+91 98712 34567' },
-                { icon: '✉️', label: 'Email', val: 'info@jsmshikshaacademy.com' },
-                { icon: '🕐', label: 'School Hours', val: 'Mon–Sat: 8:00 AM – 2:00 PM' },
-              ].map((c) => (
-                <div key={c.label} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', padding: '16px', background: '#fff', borderRadius: '12px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-                  <span style={{ fontSize: '24px' }}>{c.icon}</span>
-                  <div>
-                    <div style={{ fontWeight: 700, color: 'var(--navy)', fontSize: '14px', marginBottom: '4px' }}>{c.label}</div>
-                    <div style={{ color: '#64748b', fontSize: '14px', whiteSpace: 'pre-line' }}>{c.val}</div>
-                  </div>
-                </div>
-              ))}
+      <section className="py-32 bg-pearl">
+        <div className="max-w-7xl mx-auto px-6 space-y-16">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-navy/5 pb-16">
+            <div className="space-y-4">
+              <div className="text-gold font-black uppercase tracking-[0.2em] text-xs">Modern Campus</div>
+              <h2 className="text-5xl font-black text-navy leading-tight">World-Class Facilities</h2>
             </div>
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3500.8!2d77.07!3d28.67!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjjCsDQwJzEyLjAiTiA3N8KwMDQnMTIuMCJF!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin"
-              style={{ width: '100%', height: '380px', border: 'none', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} title="Location" />
+            <p className="text-slate-500 max-w-md font-medium">We provide students with the resources they need to explore their interests and excel in every field.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              { icon: BookOpen, title: "Smart Library", desc: "Rich collection of books and digital learning resources." },
+              { icon: Computer, title: "Computer Lab", desc: "Modern systems with high-speed internet for tech-savviness." },
+              { icon: Trophy, title: "Sports Ground", desc: "Large playground for outdoor physical activities and sports." },
+              { icon: Music, title: "Art & Craft", desc: "Creative environment for artistic expression and imagination." },
+              { icon: HeartPulse, title: "Medical Room", desc: "First aid and health monitoring support for every student." },
+              { icon: ShieldCheck, title: "Transport", desc: "Safe and reliable transportation services across the city." }
+            ].map((f, i) => (
+              <div key={i} className="flex gap-6 p-8 bg-white rounded-3xl border border-navy/5 hover:border-gold/30 transition-all group">
+                <div className="w-14 h-14 bg-navy/5 text-navy rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-navy group-hover:text-gold transition-all">
+                  <f.icon className="w-6 h-6" />
+                </div>
+                <div className="space-y-2">
+                  <h4 className="text-xl font-bold text-navy">{f.title}</h4>
+                  <p className="text-sm text-slate-500 leading-relaxed font-medium">{f.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* WhatsApp FAB */}
-      <a href="https://wa.me/919871234567" target="_blank" rel="noopener noreferrer" className="whatsapp-fab" title="Chat on WhatsApp">
-        <span style={{ fontSize: '28px' }}>💬</span>
-      </a>
+      {/* Call to Action */}
+      <section className="py-32 px-6">
+        <div className="max-w-5xl mx-auto bg-gold rounded-[3rem] p-16 md:p-24 text-center space-y-10 relative overflow-hidden shadow-2xl shadow-gold/20">
+          <div className="relative z-10 space-y-4">
+            <h2 className="text-4xl md:text-6xl font-black text-navy leading-tight">Ready to Start Your <br/>Child's Journey?</h2>
+            <p className="text-lg text-navy/60 max-w-lg mx-auto font-bold uppercase tracking-wider italic">Secure their future with JSM Shiksha Academy today.</p>
+          </div>
+          <div className="relative z-10 flex flex-wrap justify-center gap-4">
+            <Link href="/admission" className="bg-navy text-white px-12 py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-navy-light transition-all shadow-xl shadow-navy/20">Enroll Now</Link>
+            <Link href="/contact" className="bg-white/20 border-2 border-navy/10 text-navy px-12 py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-white/40 transition-all">Inquiry</Link>
+          </div>
+          
+          {/* Decors */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-navy/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
+        </div>
+      </section>
 
       <Footer />
-    </>
+    </div>
   );
 }

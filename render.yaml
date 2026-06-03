@@ -1,32 +1,41 @@
 databases:
-  # 1. PostgreSQL Database
-  - name: jsm-db
-    plan: free # Change to starter for production usage
+  - name: jsm-db-v2
+    plan: free
 
 services:
-  # 2. Django Backend
+  # Django Backend
   - type: web
-    name: jsm-backend
+    name: jsm-api-v2
     env: python
     buildCommand: "cd backend && pip install -r requirements.txt && python manage.py collectstatic --noinput"
-    startCommand: "cd backend && gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120"
+    startCommand: "cd backend && gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: jsm-db
+          name: jsm-db-v2
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
-        value: "*" # Note: In a strict prod environment, replace this with the actual render domain.
+        value: "*"
       - key: CORS_ALLOWED_ORIGINS
-        value: "https://jsm-frontend.onrender.com" # We will sync this with the frontend service name below
-      - key: CLOUDINARY_CLOUD_NAME
-        value: "your-cloudinary-name" # Fill these in the Render dashboard later
-      - key: CLOUDINARY_API_KEY
-        value: "your-cloudinary-key"
-      - key: CLOUDINARY_API_SECRET
-        value: "your-cloudinary-secret"
+        value: "http://localhost:3000" # Update in dashboard after frontend is live
     rootDir: backend
+
+  # Next.js Frontend (Optional on Render, better on Vercel)
+  - type: web
+    name: jsm-web-v2
+    env: node
+    buildCommand: "cd frontend && npm install && npm run build"
+    startCommand: "cd frontend && npm run start"
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: jsm-api-v2
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: NODE_VERSION
+        value: "20.0.0"
+    rootDir: frontend

@@ -1,92 +1,131 @@
-'use client';
-import { useState } from 'react';
-import Link from 'next/link';
-import { authAPI } from '@/lib/api';
-import { motion } from 'framer-motion';
+"use client";
+
+import { useState } from "react";
+import api from "@/lib/api";
+import Link from "next/link";
+import { UserPlus, Loader2, CheckCircle2 } from "lucide-react";
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ username: '', email: '', first_name: '', last_name: '', phone: '', password: '', password2: '', role: 'STUDENT' });
+  const [form, setForm] = useState({ 
+    username: "", 
+    email: "", 
+    password: "", 
+    password_confirm: "", 
+    first_name: "", 
+    last_name: "", 
+    role: "STUDENT", 
+    phone: "" 
+  });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.password !== form.password2) { setError("Passwords don't match!"); return; }
-    setLoading(true); setError('');
+    setLoading(true);
+    setError("");
+
     try {
-      await authAPI.register(form);
+      await api.post("/auth/register/", form);
       setSuccess(true);
-    } catch (err: unknown) {
-      const e = err as { response?: { data?: Record<string, string[]> } };
-      const data = e?.response?.data;
-      setError(data ? Object.values(data).flat().join(', ') : 'Registration failed.');
-    } finally { setLoading(false); }
+    } catch (err: any) {
+      setError(Object.values(err.response?.data?.error || {}).flat().join(", ") || "Registration failed.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fields = [
-    { label: 'First Name', key: 'first_name', type: 'text' },
-    { label: 'Last Name', key: 'last_name', type: 'text' },
-    { label: 'Username', key: 'username', type: 'text' },
-    { label: 'Email', key: 'email', type: 'email' },
-    { label: 'Phone', key: 'phone', type: 'tel' },
-    { label: 'Password', key: 'password', type: 'password' },
-    { label: 'Confirm Password', key: 'password2', type: 'password' },
-  ];
+  if (success) {
+    return (
+      <div className="min-h-screen bg-navy flex items-center justify-center p-6">
+        <div className="w-full max-w-md bg-white rounded-3xl p-10 text-center space-y-6">
+          <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto">
+            <CheckCircle2 className="w-10 h-10" />
+          </div>
+          <h2 className="text-3xl font-black text-navy">Registration Received!</h2>
+          <p className="text-slate-500 font-medium leading-relaxed">
+            Your account has been created successfully. An admin will review and approve your profile shortly.
+          </p>
+          <Link href="/login" className="btn-primary inline-block w-full">
+            Return to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #06101f 0%, #0a1628 50%, #122040 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: '500px', background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', border: '1px solid rgba(201,162,39,0.2)', borderRadius: '24px', padding: '40px', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}>
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, var(--gold), var(--gold-light))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '14px', color: 'var(--navy)', margin: '0 auto 12px' }}>JSM</div>
-          <h1 style={{ color: '#fff', fontFamily: 'Newsreader, serif', fontSize: '24px', marginBottom: '4px' }}>Create Account</h1>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>Register to access the school portal</p>
+    <div className="min-h-screen bg-navy flex items-center justify-center p-6 py-12">
+      <div className="w-full max-w-xl bg-white rounded-3xl p-8 shadow-2xl space-y-8">
+        <div className="text-center space-y-2">
+          <img src="/logo.png" alt="JSM Logo" className="w-24 h-24 object-contain mx-auto mb-4" />
+          <h2 className="text-3xl font-black text-navy">Create Account</h2>
+          <p className="text-slate-400 font-medium">Join the JSM Shiksha Academy</p>
         </div>
 
-        {success ? (
-          <div style={{ textAlign: 'center', padding: '20px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
-            <h3 style={{ color: '#fff', fontFamily: 'Newsreader, serif', marginBottom: '12px' }}>Registration Successful!</h3>
-            <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '20px', fontSize: '14px' }}>Your account is pending admin approval. You will be notified once approved.</p>
-            <Link href="/login" style={{ background: 'var(--gold)', color: 'var(--navy)', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: 700 }}>Go to Login</Link>
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-bold border border-red-100">
+            {error}
           </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            {error && <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', borderRadius: '10px', padding: '12px', marginBottom: '16px', color: '#fca5a5', fontSize: '13px' }}>⚠️ {error}</div>}
-
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>I am a</label>
-              <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.15)', background: 'var(--navy)', color: '#fff', fontSize: '14px' }}>
-                <option value="STUDENT">Student</option>
-                <option value="TEACHER">Teacher</option>
-                <option value="PARENT">Parent</option>
-              </select>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              {fields.map((f) => (
-                <div key={f.key} style={{ gridColumn: ['username', 'email', 'phone', 'password', 'password2'].includes(f.key) ? 'span 2' : 'span 1' }}>
-                  <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>{f.label}</label>
-                  <input type={f.type} required value={(form as Record<string, string>)[f.key]}
-                    onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.08)', color: '#fff', fontSize: '14px', outline: 'none' }} />
-                </div>
-              ))}
-            </div>
-
-            <button type="submit" disabled={loading}
-              style={{ width: '100%', padding: '13px', background: 'linear-gradient(135deg, var(--gold), var(--gold-light))', color: 'var(--navy)', border: 'none', borderRadius: '10px', fontWeight: 800, fontSize: '16px', cursor: loading ? 'wait' : 'pointer', marginTop: '20px' }}>
-              {loading ? 'Creating Account...' : 'Register →'}
-            </button>
-
-            <p style={{ textAlign: 'center', marginTop: '16px', color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>
-              Already have an account?{' '}
-              <Link href="/login" style={{ color: 'var(--gold)', textDecoration: 'none', fontWeight: 700 }}>Sign in</Link>
-            </p>
-          </form>
         )}
-      </motion.div>
+
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="space-y-1.5 col-span-2 md:col-span-1">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">First Name</label>
+            <input required className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold focus:border-gold outline-none" 
+              value={form.first_name} onChange={e => setForm({...form, first_name: e.target.value})} />
+          </div>
+          <div className="space-y-1.5 col-span-2 md:col-span-1">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">Last Name</label>
+            <input required className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold focus:border-gold outline-none" 
+              value={form.last_name} onChange={e => setForm({...form, last_name: e.target.value})} />
+          </div>
+          <div className="space-y-1.5 col-span-2">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">Username</label>
+            <input required className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold focus:border-gold outline-none" 
+              value={form.username} onChange={e => setForm({...form, username: e.target.value})} />
+          </div>
+          <div className="space-y-1.5 col-span-2">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">Email Address</label>
+            <input type="email" required className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold focus:border-gold outline-none" 
+              value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
+          </div>
+          <div className="space-y-1.5 col-span-2 md:col-span-1">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">Role</label>
+            <select className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold focus:border-gold outline-none"
+              value={form.role} onChange={e => setForm({...form, role: e.target.value})}>
+              <option value="STUDENT">Student</option>
+              <option value="TEACHER">Teacher</option>
+              <option value="PARENT">Parent</option>
+            </select>
+          </div>
+          <div className="space-y-1.5 col-span-2 md:col-span-1">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">Phone</label>
+            <input required className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold focus:border-gold outline-none" 
+              value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
+          </div>
+          <div className="space-y-1.5 col-span-2 md:col-span-1">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">Password</label>
+            <input type="password" required className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold focus:border-gold outline-none" 
+              value={form.password} onChange={e => setForm({...form, password: e.target.value})} />
+          </div>
+          <div className="space-y-1.5 col-span-2 md:col-span-1">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">Confirm Password</label>
+            <input type="password" required className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold focus:border-gold outline-none" 
+              value={form.password_confirm} onChange={e => setForm({...form, password_confirm: e.target.value})} />
+          </div>
+
+          <button type="submit" disabled={loading} className="col-span-2 bg-navy text-white py-4 rounded-xl font-black text-sm tracking-widest uppercase flex items-center justify-center gap-2 transition-all hover:bg-navy-light disabled:opacity-50 mt-4">
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Create Account →"}
+          </button>
+        </form>
+
+        <div className="text-center pt-4 border-t border-slate-100">
+          <p className="text-slate-400 text-sm font-bold">
+            Already have an account? <Link href="/login" className="text-gold">Sign In</Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,95 +1,93 @@
-'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { authAPI } from '@/lib/api';
-import { motion } from 'framer-motion';
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import api from "@/lib/api";
+import { useAuthStore } from "@/store/useAuthStore";
+import Link from "next/link";
+import { LogIn, Loader2, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ username: '', password: '' });
+  const [form, setForm] = useState({ username: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
+
     try {
-      const res = await authAPI.login(form);
-      const { access, refresh, user } = res.data;
-      localStorage.setItem('access_token', access);
-      localStorage.setItem('refresh_token', refresh);
-      localStorage.setItem('user', JSON.stringify(user));
-      if (user.role === 'STUDENT') router.push('/dashboard/student');
-      else if (user.role === 'TEACHER') router.push('/dashboard/teacher');
-      else router.push('/dashboard/admin');
-    } catch (err: unknown) {
-      const e = err as { response?: { data?: { detail?: string } } };
-      setError(e?.response?.data?.detail || 'Invalid credentials or account pending approval.');
+      const res = await api.post("/auth/login/", form);
+      const { access, user } = res.data.data;
+      setAuth(user, access);
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Invalid credentials or pending approval.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #06101f 0%, #0a1628 50%, #122040 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', position: 'relative', overflow: 'hidden' }}>
-      {/* Orbs */}
-      <div style={{ position: 'absolute', top: '-100px', right: '-100px', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,162,39,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '-80px', left: '-80px', width: '350px', height: '350px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(26,58,107,0.4) 0%, transparent 70%)', pointerEvents: 'none' }} />
-
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: '420px', background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', border: '1px solid rgba(201,162,39,0.2)', borderRadius: '24px', padding: '40px', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, var(--gold), var(--gold-light))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '18px', color: 'var(--navy)', margin: '0 auto 12px' }}>JSM</div>
-          <h1 style={{ color: '#fff', fontFamily: 'Newsreader, serif', fontSize: '26px', marginBottom: '4px' }}>Welcome Back</h1>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px' }}>Sign in to your school portal</p>
+    <div className="min-h-screen bg-navy flex items-center justify-center p-6">
+      <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl space-y-8">
+        <div className="text-center space-y-2">
+          <img src="/logo.png" alt="JSM Logo" className="w-24 h-24 object-contain mx-auto mb-4" />
+          <h2 className="text-3xl font-black text-navy">Welcome Back</h2>
+          <p className="text-slate-400 font-medium">Access your school portal</p>
         </div>
 
         {error && (
-          <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', color: '#fca5a5', fontSize: '14px' }}>
-            ⚠️ {error}
+          <div className="bg-red-50 text-red-600 p-4 rounded-xl flex items-center gap-3 text-sm font-bold border border-red-100">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          {[
-            { label: 'Username', key: 'username', type: 'text', placeholder: 'Enter your username' },
-            { label: 'Password', key: 'password', type: 'password', placeholder: 'Enter your password' },
-          ].map((f) => (
-            <div key={f.key} style={{ marginBottom: '16px' }}>
-              <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>{f.label}</label>
-              <input
-                type={f.type} placeholder={f.placeholder} required value={(form as Record<string, string>)[f.key]}
-                onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.08)', color: '#fff', fontSize: '14px', outline: 'none', transition: 'border 0.2s' }}
-              />
-            </div>
-          ))}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-1.5">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">Username</label>
+            <input
+              type="text"
+              required
+              className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-navy font-bold focus:border-gold outline-none transition-all"
+              value={form.username}
+              onChange={(e) => setForm({ ...form, username: e.target.value })}
+            />
+          </div>
 
-          <button type="submit" disabled={loading}
-            style={{ width: '100%', padding: '13px', background: 'linear-gradient(135deg, var(--gold), var(--gold-light))', color: 'var(--navy)', border: 'none', borderRadius: '10px', fontWeight: 800, fontSize: '16px', cursor: loading ? 'wait' : 'pointer', marginTop: '8px' }}>
-            {loading ? '⏳ Signing in...' : 'Sign In →'}
+          <div className="space-y-1.5">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">Password</label>
+            <input
+              type="password"
+              required
+              className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-navy font-bold focus:border-gold outline-none transition-all"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-navy text-white py-4 rounded-xl font-black text-sm tracking-widest uppercase flex items-center justify-center gap-2 transition-all hover:bg-navy-light active:scale-95 disabled:opacity-50"
+          >
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign In →"}
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>
-            Don&apos;t have an account?{' '}
-            <Link href="/register" style={{ color: 'var(--gold)', textDecoration: 'none', fontWeight: 700 }}>Register here</Link>
-          </p>
-          <p style={{ marginTop: '12px' }}>
-            <Link href="/" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', textDecoration: 'none' }}>← Back to Home</Link>
+        <div className="text-center pt-4 border-t border-slate-100">
+          <p className="text-slate-400 text-sm font-bold">
+            Don't have an account?{" "}
+            <Link href="/register" className="text-gold hover:text-gold-light transition-all">
+              Register here
+            </Link>
           </p>
         </div>
-
-        {/* Demo Credentials */}
-        <div style={{ marginTop: '24px', padding: '16px', background: 'rgba(201,162,39,0.1)', border: '1px solid rgba(201,162,39,0.2)', borderRadius: '10px' }}>
-          <p style={{ color: 'var(--gold)', fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>🔑 Demo Admin Credentials:</p>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px' }}>Username: <strong style={{ color: '#fff' }}>admin</strong></p>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px' }}>Password: <strong style={{ color: '#fff' }}>admin123</strong></p>
-        </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

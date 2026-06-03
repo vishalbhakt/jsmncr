@@ -1,0 +1,34 @@
+from rest_framework import permissions
+
+class IsAdmin(permissions.BasePermission):
+    """
+    Allows access only to users with the ADMIN role or superusers.
+    """
+    def has_permission(self, request, view):
+        return bool(
+            request.user and 
+            request.user.is_authenticated and 
+            (request.user.role == 'ADMIN' or request.user.is_superuser)
+        )
+
+class IsTeacher(permissions.BasePermission):
+    """
+    Allows access only to users with the TEACHER role.
+    """
+    def has_permission(self, request, view):
+        return bool(
+            request.user and 
+            request.user.is_authenticated and 
+            request.user.role == 'TEACHER'
+        )
+
+class IsStudent(permissions.BasePermission):
+    """
+    Allows access only to users with the STUDENT role.
+    """
+    def has_permission(self, request, view):
+        return bool(
+            request.user and 
+            request.user.is_authenticated and 
+            request.user.role == 'STUDENT'
+        )

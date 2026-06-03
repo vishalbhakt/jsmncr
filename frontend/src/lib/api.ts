@@ -1,85 +1,75 @@
 import axios from 'axios';
 
-const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-export const API_BASE = rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl}/api`;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 const api = axios.create({
-  baseURL: API_BASE,
-  headers: { 'Content-Type': 'application/json' },
+  baseURL: API_URL,
 });
 
-// Attach token to every request
+// Interceptor for JWT
 api.interceptors.request.use((config) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// Auto-refresh token on 401
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
-      original._retry = true;
-      try {
-        const refresh = localStorage.getItem('refresh_token');
-        if (refresh) {
-          const res = await axios.post(`${API_BASE}/auth/token/refresh/`, { refresh });
-          localStorage.setItem('access_token', res.data.access);
-          original.headers.Authorization = `Bearer ${res.data.access}`;
-          return api(original);
-        }
-      } catch {
-        localStorage.clear();
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+// Standard Response Wrapper
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data: T;
+  error: string | null;
+}
 
-// ── Auth ──
+// CRUD Helper Generator
+const crud = (endpoint: string) => ({
+  list: () => api.get(`${endpoint}/`),
+  get: (id: number | string) => api.get(`${endpoint}/${id}/`),
+  create: (data: any) => api.post(`${endpoint}/`, data),
+  update: (id: number | string, data: any) => api.patch(`${endpoint}/${id}/`, data),
+  delete: (id: number | string) => api.delete(`${endpoint}/${id}/`),
+});
+
+// Named API Exports
 export const authAPI = {
-  login: (data: { username: string; password: string }) => api.post('/auth/login/', data),
-  register: (data: object) => api.post('/auth/register/', data),
+  login: (data: any) => api.post('/auth/login/', data),
+  register: (data: any) => api.post('/auth/register/', data),
   profile: () => api.get('/auth/profile/'),
+  updateProfile: (data: any) => api.patch('/auth/profile/', data),
 };
 
-// ── Dashboard ──
 export const dashboardAPI = {
   stats: () => api.get('/dashboard/stats/'),
 };
 
-// ── CRUD factories ──
-const crud = (resource: string) => ({
-  list: (params?: object) => api.get(`/${resource}/`, { params }),
-  get: (id: number) => api.get(`/${resource}/${id}/`),
-  create: (data: object) => api.post(`/${resource}/`, data),
-  update: (id: number, data: object) => api.put(`/${resource}/${id}/`, data),
-  delete: (id: number) => api.delete(`/${resource}/${id}/`),
-});
-
-export const coursesAPI = crud('courses');
-export const subjectsAPI = crud('subjects');
-export const studentsAPI = crud('students');
-export const teachersAPI = crud('teachers');
-export const assignmentsAPI = crud('assignments');
-export const attendanceAPI = crud('attendance');
-export const paymentsAPI = crud('payments');
-export const videoLecturesAPI = crud('video-lectures');
-export const announcementsAPI = crud('announcements');
-export const eventsAPI = crud('events');
-export const galleryAPI = crud('gallery');
-export const resultsAPI = crud('results');
-export const notesAPI = crud('notes');
-export const enquiriesAPI = crud('enquiries');
 export const usersAPI = {
-  ...crud('users'),
+  ...crud('/users'),
   approve: (id: number) => api.post(`/users/${id}/approve/`),
   pending: () => api.get('/users/pending/'),
 };
+
+export const studentsAPI = crud('/students');
+export const teachersAPI = crud('/teachers');
+export const coursesAPI = crud('/courses');
+export const subjectsAPI = crud('/subjects');
+export const assignmentsAPI = crud('/assignments');
+export const submissionsAPI = {
+  ...crud('/assignment-submissions'),
+  grade: (id: number, data: any) => api.patch(`/assignment-submissions/${id}/grade/`, data),
+};
+export const notesAPI = crud('/notes');
+export const videoLecturesAPI = crud('/video-lectures');
+export const attendanceAPI = {
+  ...crud('/attendance'),
+  bulkMark: (data: any) => api.post('/attendance/bulk_mark/', data),
+};
+export const announcementsAPI = crud('/announcements');
+export const eventsAPI = crud('/events');
+export const galleryAPI = crud('/gallery');
+export const enquiriesAPI = crud('/enquiries');
+export const quizzesAPI = crud('/quizzes');
+export const paymentsAPI = crud('/payments');
+export const resultsAPI = crud('/results');
 
 export default api;

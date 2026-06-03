@@ -1,200 +1,155 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { dashboardAPI, assignmentsAPI, notesAPI, videoLecturesAPI, attendanceAPI, paymentsAPI, resultsAPI } from '@/lib/api';
+"use client";
 
-const navItems = [
-  { icon: '🏠', label: 'Overview', section: 'overview' },
-  { icon: '📝', label: 'Notes', section: 'notes' },
-  { icon: '📋', label: 'Assignments', section: 'assignments' },
-  { icon: '🎬', label: 'Video Lectures', section: 'videos' },
-  { icon: '📅', label: 'Attendance', section: 'attendance' },
-  { icon: '📊', label: 'Results', section: 'results' },
-  { icon: '💳', label: 'Payments', section: 'payments' },
-];
+import { useAuthStore } from "@/store/useAuthStore";
+import DashboardLayout from "@/components/DashboardLayout";
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
+import { 
+  CheckCircle, 
+  Clock, 
+  CreditCard,
+  Bell,
+  Calendar,
+  ArrowRight,
+  TrendingUp,
+  FileText
+} from "lucide-react";
+import { motion } from "framer-motion";
 
-export default function StudentDashboard() {
-  const [user, setUser] = useState<{ username: string; first_name: string; role: string } | null>(null);
-  const [section, setSection] = useState('overview');
-  const [stats, setStats] = useState<Record<string, unknown>>({});
-  const [data, setData] = useState<unknown[]>([]);
+export default function StudentOverview() {
+  const { user } = useAuthStore();
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
-    const init = async () => {
-      const stored = localStorage.getItem('user');
-      if (!stored) { router.push('/login'); return; }
-      const u = JSON.parse(stored);
-      setUser(u);
+    const fetchStats = async () => {
       try {
-        const r = await dashboardAPI.stats();
-        setStats(r.data);
+        const res = await api.get("/dashboard/stats/");
+        setStats(res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch stats");
       } finally {
         setLoading(false);
       }
     };
-    init();
-  }, [router]);
+    fetchStats();
+  }, []);
 
-  useEffect(() => {
-    const loaders: Record<string, () => Promise<unknown>> = {
-      assignments: () => assignmentsAPI.list(),
-      notes: () => notesAPI.list(),
-      videos: () => videoLecturesAPI.list(),
-      attendance: () => attendanceAPI.list(),
-      results: () => resultsAPI.list(),
-      payments: () => paymentsAPI.list(),
-    };
-    if (loaders[section]) {
-      loaders[section]().then((r: unknown) => {
-        const res = r as { data: { results?: unknown[] } | unknown[] };
-        setData(Array.isArray(res.data) ? res.data : (res.data as { results?: unknown[] }).results || []);
-      });
-    }
-  }, [section]);
-
-  if (loading) return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--navy)' }}><span style={{ color: 'var(--gold)', fontSize: '20px' }}>Loading...</span></div>;
-
-  const attendPercent = stats.attendance_percentage ?? 0;
+  if (!user) return null;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f5f9' }}>
-      {/* Sidebar */}
-      <div style={{ width: '240px', background: 'var(--navy)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-        <div style={{ padding: '24px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-          <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, var(--gold), var(--gold-light))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '18px', color: 'var(--navy)', marginBottom: '10px' }}>
-            {user?.first_name?.[0]?.toUpperCase() || '👤'}
+    <DashboardLayout>
+      <div className="space-y-10 pb-20">
+        {/* Welcome Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h1 className="text-4xl font-black text-navy tracking-tight">
+              Hi, {user.first_name || user.username} 👋
+            </h1>
+            <p className="text-slate-500 font-medium mt-1">
+              Ready to learn something new today?
+            </p>
           </div>
-          <div style={{ color: '#fff', fontWeight: 700 }}>{user?.first_name || user?.username}</div>
-          <div style={{ color: 'var(--gold)', fontSize: '12px' }}>Student Portal</div>
-        </div>
-        <nav style={{ flex: 1, padding: '16px 12px' }}>
-          {navItems.map((item) => (
-            <button key={item.section} onClick={() => setSection(item.section)}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '10px', border: 'none', background: section === item.section ? 'rgba(201,162,39,0.15)' : 'transparent', color: section === item.section ? 'var(--gold)' : 'rgba(255,255,255,0.65)', cursor: 'pointer', fontSize: '14px', fontWeight: 600, marginBottom: '4px', textAlign: 'left', transition: 'all 0.2s' }}>
-              <span>{item.icon}</span> {item.label}
-            </button>
-          ))}
-        </nav>
-        <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontSize: '13px', marginBottom: '4px' }}>🌐 Home</Link>
-          <button onClick={() => { localStorage.clear(); router.push('/login'); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>🚪 Logout</button>
-        </div>
-      </div>
-
-      {/* Main */}
-      <div style={{ flex: 1, overflow: 'auto' }}>
-        <div style={{ background: '#fff', padding: '16px 32px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h1 style={{ fontFamily: 'Newsreader, serif', color: 'var(--navy)', fontSize: '22px' }}>
-            {navItems.find(n => n.section === section)?.label || 'Dashboard'}
-          </h1>
-          <span style={{ color: '#94a3b8', fontSize: '13px' }}>Welcome, {user?.first_name || user?.username}!</span>
+          <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl border border-navy/5 shadow-sm">
+             <Calendar className="w-5 h-5 text-gold" />
+             <span className="text-sm font-black text-navy uppercase tracking-widest">
+               {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+             </span>
+          </div>
         </div>
 
-        <div style={{ padding: '32px' }}>
-          {section === 'overview' && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              {/* Summary Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-                {[
-                  { icon: '📅', label: 'Attendance', value: `${attendPercent}%`, color: Number(attendPercent) >= 75 ? '#22c55e' : '#ef4444' },
-                  { icon: '📋', label: 'Assignments', value: `${stats.attendance_total ?? 0}`, color: '#3b82f6' },
-                  { icon: '💳', label: 'Pending Fees', value: `${stats.pending_payments ?? 0}`, color: '#f59e0b' },
-                  { icon: '📊', label: 'Results', value: `${(stats.recent_results as unknown[])?.length ?? 0}`, color: '#8b5cf6' },
-                ].map((s) => (
-                  <div key={s.label} style={{ background: '#fff', borderRadius: '16px', padding: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '28px', marginBottom: '8px' }}>{s.icon}</div>
-                    <div style={{ fontSize: '28px', fontWeight: 900, color: s.color }}>{s.value}</div>
-                    <div style={{ color: '#64748b', fontSize: '13px', marginTop: '4px' }}>{s.label}</div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <StatCard 
+            icon={CheckCircle} 
+            label="Attendance" 
+            value={`${stats?.attendance_percentage ?? 0}%`} 
+            color="bg-emerald-500" 
+            desc="Keep it above 75%"
+          />
+          <StatCard 
+            icon={Clock} 
+            label="Assignments" 
+            value={stats?.my_assignments} 
+            color="bg-rose-500" 
+            desc="Pending submissions"
+          />
+          <StatCard 
+            icon={CreditCard} 
+            label="Pending Fees" 
+            value={stats?.pending_payments} 
+            color="bg-amber-500" 
+            desc="Due this month"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          {/* Announcements */}
+          <div className="lg:col-span-2 bg-white rounded-[2.5rem] border border-navy/5 p-10 shadow-sm space-y-8">
+             <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-black text-navy">Latest Updates</h3>
+                <Bell className="w-6 h-6 text-gold animate-bounce" />
+             </div>
+             
+             <div className="space-y-4">
+                {stats?.recent_announcements?.map((a: any) => (
+                  <div key={a.id} className="p-6 bg-slate-50 rounded-3xl border border-navy/5 flex items-start gap-4 hover:bg-white hover:shadow-xl transition-all cursor-default group">
+                     <div className="w-12 h-12 bg-gold/10 text-gold rounded-2xl flex items-center justify-center shrink-0 font-black text-xs group-hover:bg-navy group-hover:text-gold transition-all">📢</div>
+                     <div>
+                        <div className="font-black text-navy leading-tight mb-1">{a.title}</div>
+                        <p className="text-sm text-slate-400 font-medium line-clamp-2">{a.content}</p>
+                        <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-3">{new Date(a.created_at).toLocaleDateString()}</div>
+                     </div>
                   </div>
                 ))}
-              </div>
-
-              {/* Attendance Progress */}
-              <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', marginBottom: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid #e2e8f0' }}>
-                <h2 style={{ fontFamily: 'Newsreader, serif', color: 'var(--navy)', marginBottom: '16px', fontSize: '20px' }}>Attendance Overview</h2>
-                <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ color: '#64748b', fontSize: '14px' }}>Attendance Rate</span>
-                      <span style={{ fontWeight: 700, color: Number(attendPercent) >= 75 ? '#22c55e' : '#ef4444' }}>{String(attendPercent)}%</span>
-                    </div>
-                    <div style={{ height: '10px', background: '#f1f5f9', borderRadius: '5px', overflow: 'hidden' }}>
-                      <div style={{ width: `${attendPercent}%`, height: '100%', background: Number(attendPercent) >= 75 ? '#22c55e' : '#ef4444', borderRadius: '5px', transition: 'width 1s ease' }} />
-                    </div>
-                    {Number(attendPercent) < 75 && <p style={{ color: '#ef4444', fontSize: '13px', marginTop: '8px' }}>⚠️ Below 75% minimum requirement</p>}
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '40px', fontWeight: 900, color: Number(attendPercent) >= 75 ? '#22c55e' : '#ef4444' }}>{String(attendPercent)}%</div>
-                    <div style={{ color: '#94a3b8', fontSize: '12px' }}>Attendance</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Announcements */}
-              <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid #e2e8f0' }}>
-                <h2 style={{ fontFamily: 'Newsreader, serif', color: 'var(--navy)', marginBottom: '16px', fontSize: '20px' }}>Recent Announcements</h2>
-                {Array.isArray(stats.recent_announcements) ? (
-                  (stats.recent_announcements as Array<{id: number; title: string; content: string; created_at: string}>).map((a) => (
-                    <div key={a.id} style={{ padding: '12px 0', borderBottom: '1px solid #f1f5f9' }}>
-                      <div style={{ fontWeight: 700, color: 'var(--navy)', fontSize: '14px' }}>{a.title}</div>
-                      <div style={{ color: '#64748b', fontSize: '13px', marginTop: '2px' }}>{a.content}</div>
-                    </div>
-                  ))
-                ) : <p style={{ color: '#94a3b8' }}>No announcements.</p>}
-              </div>
-            </motion.div>
-          )}
-
-          {section !== 'overview' && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <div style={{ background: '#fff', borderRadius: '16px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-                <div style={{ padding: '20px 24px', borderBottom: '1px solid #f1f5f9' }}>
-                  <h2 style={{ fontFamily: 'Newsreader, serif', color: 'var(--navy)', fontSize: '20px', textTransform: 'capitalize' }}>{section}</h2>
-                </div>
-                {data.length === 0 ? (
-                  <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>
-                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
-                    <p>No {section} found yet.</p>
-                  </div>
-                ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px', padding: '24px' }}>
-                    {(data as Array<Record<string, any>>).map((item, i) => (
-                      <div key={i} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <span style={{ background: 'rgba(201,162,39,0.1)', color: 'var(--gold)', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 700 }}>{item.subject_name || 'General'}</span>
-                          <span style={{ color: '#94a3b8', fontSize: '11px' }}>{new Date(item.created_at).toLocaleDateString()}</span>
-                        </div>
-                        <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--navy)' }}>{item.title}</h3>
-                        <p style={{ fontSize: '13px', color: '#64748b', lineClamp: 2, display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden' }}>{item.description || item.content || 'No description provided.'}</p>
-                        
-                        <div style={{ marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontSize: '12px', color: '#94a3b8' }}>By: {item.teacher_name || 'Staff'}</span>
-                          
-                          {/* Action Buttons */}
-                          {(item.file || item.video_file) && (
-                            <a href={item.file || item.video_file} target="_blank" rel="noopener noreferrer" style={{ background: 'var(--navy)', color: '#fff', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, textDecoration: 'none' }}>
-                              ⬇️ Download
-                            </a>
-                          )}
-                          {item.video_url && (
-                            <a href={item.video_url} target="_blank" rel="noopener noreferrer" style={{ background: '#ef4444', color: '#fff', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, textDecoration: 'none' }}>
-                              🎬 Watch
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                {!stats?.recent_announcements?.length && (
+                  <div className="text-center py-20 text-slate-300 font-medium italic">No new announcements.</div>
                 )}
-              </div>
-            </motion.div>
-          )}
+             </div>
+          </div>
+
+          {/* Performance & Tips */}
+          <div className="space-y-8">
+             <div className="bg-navy rounded-[2.5rem] p-10 text-white shadow-xl relative overflow-hidden flex flex-col justify-between h-64">
+                <div className="relative z-10">
+                   <h3 className="text-2xl font-black text-gold mb-3">Academic Tip</h3>
+                   <p className="text-white/60 font-medium italic leading-relaxed">"Consistency is key. Try to complete your assignments 24 hours before the deadline."</p>
+                </div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+             </div>
+
+             <div className="bg-white rounded-[2.5rem] border border-navy/5 p-10 shadow-sm space-y-6">
+                <div className="flex items-center justify-between">
+                   <h3 className="text-xl font-bold text-navy">My Performance</h3>
+                   <TrendingUp className="w-5 h-5 text-emerald-500" />
+                </div>
+                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                   <div className="h-full bg-gold rounded-full" style={{ width: '85%' }}></div>
+                </div>
+                <div className="flex justify-between text-xs font-black uppercase tracking-widest text-slate-400">
+                   <span>Overall Progress</span>
+                   <span className="text-navy">85%</span>
+                </div>
+             </div>
+          </div>
         </div>
       </div>
+    </DashboardLayout>
+  );
+}
+
+function StatCard({ icon: Icon, label, value, color, desc }: any) {
+  return (
+    <div className="bg-white p-8 rounded-[2.5rem] border border-navy/5 shadow-sm group hover:border-gold/30 transition-all flex flex-col justify-between h-52 relative overflow-hidden">
+      <div className={`w-14 h-14 ${color} bg-opacity-10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform relative z-10`}>
+        <Icon className={`w-7 h-7 ${color.replace('bg-', 'text-')}`} />
+      </div>
+      <div className="relative z-10">
+        <div className="text-4xl font-black text-navy leading-none mb-2">{value ?? 0}</div>
+        <div className="text-xs font-black text-slate-400 uppercase tracking-widest">{label}</div>
+        <div className="text-[10px] font-bold text-slate-300 mt-1">{desc}</div>
+      </div>
+      <div className={`absolute -bottom-10 -right-10 w-32 h-32 ${color} opacity-[0.03] rounded-full blur-2xl group-hover:opacity-[0.05] transition-opacity`}></div>
     </div>
   );
 }
