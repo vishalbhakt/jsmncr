@@ -1,16 +1,43 @@
-# JSM Shiksha Academy — Deployment Files
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environments
 venv/
-__pycache__/
-*.pyc
-*.pyo
+.venv/
+env/
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
 *.sqlite3
-node_modules/
-.next/
-.DS_Store
 media/
 staticfiles/
 *.log
 
+# Node / Next.js
+node_modules/
+.next/
+dist/
+build/
+.vercel
+.turbo
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Project specific
 graphify-out/
+backend_old/
+frontend_old/
+temp/
+tmp/
